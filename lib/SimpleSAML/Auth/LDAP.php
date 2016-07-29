@@ -55,15 +55,21 @@ class SimpleSAML_Auth_LDAP {
      * @param bool $referrals
      */
     // TODO: Flesh out documentation
-    public function __construct($hostname, $enable_tls = TRUE, $debug = FALSE, $timeout = 0, $port = 389, $referrals = TRUE) {
+    public function __construct($servers, $debug = FALSE, $timeout = 0) {
 
         // Debug
         SimpleSAML\Logger::debug('Library - LDAP __construct(): Setup LDAP with ' .
-                        'host=\'' . $hostname .
-                        '\', tls=' . var_export($enable_tls, true) .
                         ', debug=' . var_export($debug, true) .
-                        ', timeout=' . var_export($timeout, true) .
-                        ', referrals=' . var_export($referrals, true));
+                        ', timeout=' . var_export($timeout, true)
+            );
+
+        foreach ($servers as $index => $server) {
+            SimpleSAML\Logger::debug('Library - LDAP __construct(): ' .
+                        'server[' . $index . ']=\''. $server['uri'] . '\'' . 
+                        ', tls=' . var_export($server['enable_tls'], $true) . 
+                        ', referrals=' . var_export($server['referrals'], $true)
+            );
+        }
 
         /*
          * Set debug level before calling connect. Note that this passes
@@ -79,10 +85,14 @@ class SimpleSAML_Auth_LDAP {
          * Prepare a connection for to this LDAP server. Note that this function
          * doesn't actually connect to the server.
          */
-        $this->ldap = @ldap_connect($hostname, $port);
-        if ($this->ldap === FALSE) {
-            throw $this->makeException('Library - LDAP __construct(): Unable to connect to \'' . $hostname . '\'', ERR_INTERNAL);
-        }
+        foreach ($servers as $server) {
+            $this->ldap = @ldap_connect($server['uri']);
+            if ($this->ldap !== FALSE) {
+                break;
+            } else {
+                throw $this->makeException('Library - LDAP __construct(): Unable to connect to \'' . $server['uri'] . '\'', ERR_INTERNAL);
+            }
+        }    
 
         // Enable LDAP protocol version 3
         if (!@ldap_set_option($this->ldap, LDAP_OPT_PROTOCOL_VERSION, 3)) {
@@ -90,8 +100,8 @@ class SimpleSAML_Auth_LDAP {
         }
 
         // Set referral option
-        if (!@ldap_set_option($this->ldap, LDAP_OPT_REFERRALS, $referrals)) {
-            throw $this->makeException('Library - LDAP __construct(): Failed to set LDAP Referrals (LDAP_OPT_REFERRALS) to '.$referrals, ERR_INTERNAL);
+        if (!@ldap_set_option($this->ldap, LDAP_OPT_REFERRALS, $server['referrals'])) {
+            throw $this->makeException('Library - LDAP __construct(): Failed to set LDAP Referrals (LDAP_OPT_REFERRALS) to '.$server['referrals'], ERR_INTERNAL);
         }
 
         // Set timeouts, if supported
@@ -107,7 +117,7 @@ class SimpleSAML_Auth_LDAP {
         }
 
         // Enable TLS, if needed
-        if (stripos($hostname, "ldaps:") === FALSE and $enable_tls) {
+        if (stripos($server['uri'], "ldaps:") === FALSE and $server['enable_tls']) {
             if (!@ldap_start_tls($this->ldap)) {
                 throw $this->makeException('Library - LDAP __construct(): Unable to force TLS', ERR_INTERNAL);
             }
@@ -154,27 +164,25 @@ class SimpleSAML_Auth_LDAP {
                 case ERR_AS_INTERNAL:// 5 - ExAsInternal
                     return new SimpleSAML_Error_AuthSource('ldap', $description);
             }
-        } else {
-            if ($errNo !== 0) {
-                $description .= '; cause: \'' . ldap_error($this->ldap) . '\' (0x' . dechex($errNo) . ')';
-                if (@ldap_get_option($this->ldap, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extendedError) && !empty($extendedError)) {
-                    $description .= '; additional: \'' . $extendedError . '\'';
-                }
+        } elseif ($errNo !== 0) {
+            $description .= '; cause: \'' . ldap_error($this->ldap) . '\' (0x' . dechex($errNo) . ')';
+            if (@ldap_get_option($this->ldap, LDAP_OPT_DIAGNOSTIC_MESSAGE, $extendedError) && !empty($extendedError)) {
+                $description .= '; additional: \'' . $extendedError . '\'';
             }
-            switch ($errNo) {
-                case 0x20://LDAP_NO_SUCH_OBJECT
-                    SimpleSAML\Logger::warning($description);
-                    return new SimpleSAML_Error_UserNotFound($description, $errNo);
-                case 0x31://LDAP_INVALID_CREDENTIALS
-                    SimpleSAML\Logger::info($description);
-                    return new SimpleSAML_Error_InvalidCredential($description, $errNo);
-                case -1://NO_SERVER_CONNECTION
-                    SimpleSAML\Logger::error($description);
-                    return new SimpleSAML_Error_AuthSource('ldap', $description);
-                default:
-                    SimpleSAML\Logger::error($description);
-                    return new SimpleSAML_Error_AuthSource('ldap', $description);
-            }
+        }
+        switch ($errNo) {
+            case 32://LDAP_NO_SUCH_OBJECT
+                SimpleSAML\Logger::warning($description);
+                return new SimpleSAML_Error_UserNotFound($description, $errNo);
+            case 49://LDAP_INVALID_CREDENTIALS
+                SimpleSAML\Logger::info($description);
+                return new SimpleSAML_Error_InvalidCredential($description, $errNo);
+            case -1://NO_SERVER_CONNECTION
+                SimpleSAML\Logger::error($description);
+                return new SimpleSAML_Error_AuthSource('ldap', $description);
+            default:
+                SimpleSAML\Logger::error($description);
+                return new SimpleSAML_Error_AuthSource('ldap', $description);
         }
     }
 
