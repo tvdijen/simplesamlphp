@@ -73,11 +73,11 @@ class SimpleSAML_Auth_LDAP {
 
         /*
          * Set debug level before calling connect. Note that this passes
-         * NULL to ldap_set_option, which is an undocumented feature.
+         * null to ldap_set_option, which is an undocumented feature.
          *
          * OpenLDAP 2.x.x or Netscape Directory SDK x.x needed for this option.
          */
-        if ($debug && !ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, 7)) {
+        if ($debug && !ldap_set_option(null, LDAP_OPT_DEBUG_LEVEL, 7)) {
                 SimpleSAML\Logger::warning('Library - LDAP __construct(): Unable to set debug level (LDAP_OPT_DEBUG_LEVEL) to 7');
         }
 
@@ -133,7 +133,7 @@ class SimpleSAML_Auth_LDAP {
      * The exception's description
      * @return Exception
      */
-    private function makeException($description, $type = NULL) {
+    private function makeException($description, $type = null) {
         $errNo = 0x00;
 
         // Log LDAP code and description, if possible
@@ -210,7 +210,7 @@ class SimpleSAML_Auth_LDAP {
      * @throws SimpleSAML_Error_UserNotFound if:
      * - Zero entries was found
      */
-    private function search($base, $attribute, $value, $searchFilter=NULL) {
+    private function search($base, $attribute, $value, $searchFilter=null) {
 
         // Create the search filter
         $attribute = self::escape_filter_value($attribute, FALSE);
@@ -276,7 +276,7 @@ class SimpleSAML_Auth_LDAP {
      * @return string
      * The DN of the matching element, if found. If no element was found and
      * $allowZeroHits is set to FALSE, an exception will be thrown; otherwise
-     * NULL will be returned.
+     * null will be returned.
      * @throws SimpleSAML_Error_AuthSource if:
      * - LDAP search encounter some problems when searching cataloge
      * - Not able to connect to LDAP server
@@ -284,7 +284,7 @@ class SimpleSAML_Auth_LDAP {
      * - $allowZeroHits er TRUE and no result is found
      *
      */
-    public function searchfordn($base, $attribute, $value, $allowZeroHits = FALSE, $searchFilter = NULL) {
+    public function searchfordn($base, $attribute, $value, $allowZeroHits = FALSE, $searchFilter = null) {
 
         // Traverse all search bases, returning DN if found
         $bases = SimpleSAML\Utils\Arrays::arrayize($base);
@@ -307,7 +307,7 @@ class SimpleSAML_Auth_LDAP {
         SimpleSAML\Logger::debug('Library - LDAP searchfordn(): No entries found');
         if ($allowZeroHits) {
             // Zero hits allowed
-            return NULL;
+            return null;
         } else {
             // Zero hits not allowed
             throw $this->makeException('Library - LDAP searchfordn(): LDAP search returned zero entries for filter \'(' .
