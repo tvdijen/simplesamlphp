@@ -47,15 +47,12 @@ class SimpleSAML_Auth_LDAP {
     /**
      * Private constructor restricts instantiation to getInstance().
      *
-     * @param string $hostname
-     * @param bool $enable_tls
+     * @param array $servers
      * @param bool $debug
      * @param int $timeout
-     * @param int $port
-     * @param bool $referrals
      */
     // TODO: Flesh out documentation
-    public function __construct($servers, $debug = FALSE, $timeout = 0) {
+    public function __construct($servers, $debug = false, $timeout = 0) {
 
         // Debug
         SimpleSAML\Logger::debug('Library - LDAP __construct(): Setup LDAP with ' .
@@ -66,8 +63,8 @@ class SimpleSAML_Auth_LDAP {
         foreach ($servers as $index => $server) {
             SimpleSAML\Logger::debug('Library - LDAP __construct(): ' .
                         'server[' . $index . ']=\''. $server['uri'] . '\'' . 
-                        ', tls=' . var_export($server['enable_tls'], $true) . 
-                        ', referrals=' . var_export($server['referrals'], $true)
+                        ', tls=' . var_export($server['enable_tls'], true) . 
+                        ', referrals=' . var_export($server['referrals'], true)
             );
         }
 
@@ -87,7 +84,7 @@ class SimpleSAML_Auth_LDAP {
          */
         foreach ($servers as $server) {
             $this->ldap = @ldap_connect($server['uri']);
-            if ($this->ldap !== FALSE) {
+            if ($this->ldap !== false) {
                 break;
             } else {
                 throw $this->makeException('Library - LDAP __construct(): Unable to connect to \'' . $server['uri'] . '\'', ERR_INTERNAL);
@@ -117,7 +114,7 @@ class SimpleSAML_Auth_LDAP {
         }
 
         // Enable TLS, if needed
-        if (stripos($server['uri'], "ldaps:") === FALSE and $server['enable_tls']) {
+        if (stripos($server['uri'], "ldaps:") === false and $server['enable_tls']) {
             if (!@ldap_start_tls($this->ldap)) {
                 throw $this->makeException('Library - LDAP __construct(): Unable to force TLS', ERR_INTERNAL);
             }
@@ -213,7 +210,7 @@ class SimpleSAML_Auth_LDAP {
     private function search($base, $attribute, $value, $searchFilter=null) {
 
         // Create the search filter
-        $attribute = self::escape_filter_value($attribute, FALSE);
+        $attribute = self::escape_filter_value($attribute, false);
         $value = self::escape_filter_value($value);
         $filter = '';
         foreach ($attribute AS $attr) {
@@ -230,13 +227,13 @@ class SimpleSAML_Auth_LDAP {
         SimpleSAML\Logger::debug('Library - LDAP search(): Searching base \'' . $base . '\' for \'' . $filter . '\'');
         // TODO: Should aliases be dereferenced?
         $result = @ldap_search($this->ldap, $base, $filter, array(), 0, 0, $this->timeout);
-        if ($result === FALSE) {
+        if ($result === false) {
             throw $this->makeException('Library - LDAP search(): Failed search on base \'' . $base . '\' for \'' . $filter . '\'');
         }
 
         // Sanity checks on search results
         $count = @ldap_count_entries($this->ldap, $result);
-        if ($count === FALSE) {
+        if ($count === false) {
             throw $this->makeException('Library - LDAP search(): Failed to get number of entries returned');
         } elseif ($count > 1) {
             // More than one entry is found. External error
@@ -249,11 +246,11 @@ class SimpleSAML_Auth_LDAP {
 
         // Resolve the DN from the search result
         $entry = @ldap_first_entry($this->ldap, $result);
-        if ($entry === FALSE) {
+        if ($entry === false) {
             throw $this->makeException('Library - LDAP search(): Unable to retrieve result after searching base \'' . $base . '\' for \'' . $filter . '\'');
         }
         $dn = @ldap_get_dn($this->ldap, $entry);
-        if ($dn === FALSE) {
+        if ($dn === false) {
             throw $this->makeException('Library - LDAP search(): Unable to get DN after searching base \'' . $base . '\' for \'' . $filter . '\'');
         }
         // FIXME: Are we now sure, if no excepton has been thrown, that we are returning a DN?
@@ -272,23 +269,23 @@ class SimpleSAML_Auth_LDAP {
      * The attribute value searched for.
      * @param bool $allowZeroHits
      * Determines if the method will throw an exception if no hits are found.
-     * Defaults to FALSE.
+     * Defaults to false.
      * @return string
      * The DN of the matching element, if found. If no element was found and
-     * $allowZeroHits is set to FALSE, an exception will be thrown; otherwise
+     * $allowZeroHits is set to false, an exception will be thrown; otherwise
      * null will be returned.
      * @throws SimpleSAML_Error_AuthSource if:
      * - LDAP search encounter some problems when searching cataloge
      * - Not able to connect to LDAP server
      * @throws SimpleSAML_Error_UserNotFound if:
-     * - $allowZeroHits er TRUE and no result is found
+     * - $allowZeroHits er true and no result is found
      *
      */
-    public function searchfordn($base, $attribute, $value, $allowZeroHits = FALSE, $searchFilter = null) {
+    public function searchfordn($base, $attribute, $value, $allowZeroHits = false, $searchFilter = null) {
 
         // Traverse all search bases, returning DN if found
         $bases = SimpleSAML\Utils\Arrays::arrayize($base);
-        $result = NULL;
+        $result = null;
         foreach ($bases AS $current) {
             try {
                 // Single base search
@@ -328,11 +325,11 @@ class SimpleSAML_Auth_LDAP {
      * @param bool $escape Weather to escape the filter values or not
      * @return array
      */
-    public function searchformultiple($bases, $filters, $attributes = array(), $and = TRUE, $escape = TRUE) {
+    public function searchformultiple($bases, $filters, $attributes = array(), $and = true, $escape = true) {
 
         // Escape the filter values, if requested
         if ($escape) {
-            $filters = $this->escape_filter_value($filters, FALSE);
+            $filters = $this->escape_filter_value($filters, false);
         }
 
         // Build search filter
@@ -360,16 +357,16 @@ class SimpleSAML_Auth_LDAP {
         }
 
         // Search each base until result is found
-        $result = FALSE;
+        $result = false;
         foreach ($bases as $base) {
             $result = @ldap_search($this->ldap, $base, $filter, $attributes, 0, 0, $this->timeout);
-            if ($result !== FALSE) {
+            if ($result !== false) {
             	break;
             }
         }
 
         // Verify that a result was found in one of the bases
-        if ($result === FALSE) {
+        if ($result === false) {
             throw $this->makeException(
                 'ldap:LdapConnection->search_manual : Failed to search LDAP using base(s) [' .
                 implode('; ', $bases) . '] with filter [' . $filter . ']. LDAP error [' .
@@ -385,7 +382,7 @@ class SimpleSAML_Auth_LDAP {
 
         // Get all results
         $results = ldap_get_entries($this->ldap, $result);
-        if ($results === FALSE) {
+        if ($results === false) {
             throw $this->makeException(
                 'ldap:LdapConnection->search_manual : Unable to retrieve entries from search results'
             );
@@ -427,15 +424,15 @@ class SimpleSAML_Auth_LDAP {
      * @param array $sasl_args
      * Array of SASL options for SASL bind
      * @return bool
-     * Returns TRUE if successful, FALSE if
+     * Returns true if successful, false if
      * LDAP_INVALID_CREDENTIALS, LDAP_X_PROXY_AUTHZ_FAILURE,
      * LDAP_INAPPROPRIATE_AUTH, LDAP_INSUFFICIENT_ACCESS
      * @throws SimpleSAML_Error_Exception on other errors
      */
-    public function bind($dn, $password, array $sasl_args = NULL) {
+    public function bind($dn, $password, array $sasl_args = null) {
         $authz_id = null;
 
-        if ($sasl_args != NULL) {
+        if ($sasl_args != null) {
             if (!function_exists('ldap_sasl_bind')) {
                 $ex_msg = 'Library - missing SASL support';
                 throw $this->makeException($ex_msg);
@@ -455,11 +452,11 @@ class SimpleSAML_Auth_LDAP {
             $error = @ldap_bind($this->ldap, $dn, $password);
         }
 
-        if ($error === TRUE) {
+        if ($error === true) {
             // Good
             $this->authz_id = $authz_id;
             SimpleSAML\Logger::debug('Library - LDAP bind(): Bind successful with DN \'' . $dn . '\'');
-            return TRUE;
+            return true;
         }
 
         /* Handle errors
@@ -519,7 +516,7 @@ class SimpleSAML_Auth_LDAP {
      * @param string $dn
      * The DN of an element.
      * @param string|array $attributes
-     * The names of the attribute(s) to retrieve. Defaults to NULL; that is,
+     * The names of the attribute(s) to retrieve. Defaults to null; that is,
      * all available attributes. Note that this is not very effective.
      * @param int $maxsize
      * The maximum size of any attribute's value(s). If exceeded, the attribute
@@ -528,7 +525,7 @@ class SimpleSAML_Auth_LDAP {
      * The array of attributes and their values.
      * @see http://no.php.net/manual/en/function.ldap-read.php
      */
-    public function getAttributes($dn, $attributes = NULL, $maxsize = NULL) {
+    public function getAttributes($dn, $attributes = null, $maxsize = null) {
 
         // Preparations, including a pretty debug message...
         $description = 'all attributes';
@@ -628,7 +625,7 @@ class SimpleSAML_Auth_LDAP {
             $password = addcslashes($password, ',+"\\<>;*');
             if (!$this->bind($dn, $password)) {
                 SimpleSAML\Logger::info('Library - LDAP validate(): Failed to authenticate \''. $username . '\' using DN \'' . $dn . '\'');
-                return FALSE;
+                return false;
             }
         }
 
@@ -654,7 +651,7 @@ class SimpleSAML_Auth_LDAP {
      * @param array $values Array of values to escape
      * @return array Array $values, but escaped
      */
-    public static function escape_filter_value($values = array(), $singleValue = TRUE) {
+    public static function escape_filter_value($values = array(), $singleValue = true) {
         // Parameter validation
         if (!is_array($values)) {
             $values = array($values);
