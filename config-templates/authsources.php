@@ -89,8 +89,8 @@ $config = array(
 
         // Give the user an option to save their username for future login attempts
         // And when enabled, what should the default be, to save the username or not
-        //'remember.username.enabled' => FALSE,
-        //'remember.username.checked' => FALSE,
+        //'remember.username.enabled' => false,
+        //'remember.username.checked' => false,
 
         'student:studentpass' => array(
             'uid' => array('test'),
@@ -230,7 +230,7 @@ $config = array(
 
         // Forces the user to enter their credentials to ensure the correct users account is authorized.
         // Details: https://dev.twitter.com/docs/api/1/get/oauth/authenticate
-        'force_login' => FALSE,
+        'force_login' => false,
     ),
     */
 
@@ -263,44 +263,46 @@ $config = array(
 
         // Give the user an option to save their username for future login attempts
         // And when enabled, what should the default be, to save the username or not
-        //'remember.username.enabled' => FALSE,
-        //'remember.username.checked' => FALSE,
+        //'remember.username.enabled' => false,
+        //'remember.username.checked' => false,
 
-        // The hostname of the LDAP server.
-        'hostname' => 'ldap.example.org',
-
-        // Whether SSL/TLS should be used when contacting the LDAP server.
-        'enable_tls' => TRUE,
+        // The servers we're connecting to
+        'servers' => array(
+            array(
+                'uri' => 'ldaps://ldap.example.org',
+                'enable_tls' => false,
+                'referrals' => false,
+            ),
+            
+            array(
+                'uri' => 'ldap://ldap.example.org:1389',
+                'enable_tls' => true,
+                'referrals' => true,
+            ),
+        );
 
         // Whether debug output from the LDAP library should be enabled.
-        // Default is FALSE.
-        'debug' => FALSE,
+        // Default is false.
+        'debug' => false,
 
         // The timeout for accessing the LDAP server, in seconds.
         // The default is 0, which means no timeout.
         'timeout' => 0,
 
-        // The port used when accessing the LDAP server.
-        // The default is 389.
-        'port' => 389,
-
-        // Set whether to follow referrals. AD Controllers may require FALSE to function.
-        'referrals' => TRUE,
-
         // Which attributes should be retrieved from the LDAP server.
-        // This can be an array of attribute names, or NULL, in which case
+        // This can be an array of attribute names, or null, in which case
         // all attributes are fetched.
-        'attributes' => NULL,
+        'attributes' => null,
 
         // The pattern which should be used to create the users DN given the username.
         // %username% in this pattern will be replaced with the users username.
         //
-        // This option is not used if the search.enable option is set to TRUE.
+        // This option is not used if the search.enable option is set to true.
         'dnpattern' => 'uid=%username%,ou=people,dc=example,dc=org',
 
         // As an alternative to specifying a pattern for the users DN, it is possible to
         // search for the username in a set of attributes. This is enabled by this option.
-        'search.enable' => FALSE,
+        'search.enable' => false,
 
         // The DN which will be used as a base for the search.
         // This can be a single string, in which case only that DN is searched, or an
@@ -317,21 +319,21 @@ $config = array(
         'search.filter' => '(objectclass=inetorgperson)',
 
         // The username & password the SimpleSAMLphp should bind to before searching. If
-        // this is left as NULL, no bind will be performed before searching.
-        'search.username' => NULL,
-        'search.password' => NULL,
+        // this is left as null, no bind will be performed before searching.
+        'search.username' => null,
+        'search.password' => null,
 
         // If the directory uses privilege separation,
         // the authenticated user may not be able to retrieve
         // all required attribures, a privileged entity is required
         // to get them. This is enabled with this option.
-        'priv.read' => FALSE,
+        'priv.read' => false,
 
         // The DN & password the SimpleSAMLphp should bind to before
         // retrieving attributes. These options are required if
-        // 'priv.read' is set to TRUE.
-        'priv.username' => NULL,
-        'priv.password' => NULL,
+        // 'priv.read' is set to true.
+        'priv.username' => null,
+        'priv.password' => null,
 
     ),
     */
@@ -343,8 +345,8 @@ $config = array(
 
         // Give the user an option to save their username for future login attempts
         // And when enabled, what should the default be, to save the username or not
-        //'remember.username.enabled' => FALSE,
-        //'remember.username.checked' => FALSE,
+        //'remember.username.enabled' => false,
+        //'remember.username.checked' => false,
 
         // The way the organization as part of the username should be handled.
         // Three possible values:
@@ -359,11 +361,11 @@ $config = array(
 
         // Whether the organization should be included as part of the username
         // when authenticating. If this is set to TRUE, the username will be on
-        // the form <username>@<organization identifier>. If this is FALSE, the
+        // the form <username>@<organization identifier>. If this is false, the
         // username will be used as the user enters it.
         //
-        // The default is FALSE.
-        'include_organization_in_username' => FALSE,
+        // The default is false.
+        'include_organization_in_username' => false,
 
         // A list of available LDAP servers.
         //
@@ -382,14 +384,26 @@ $config = array(
 
             // The rest of the options are the same as those available for
             // the LDAP authentication source.
-            'hostname' => 'ldap.employees.example.org',
+            'servers' => array(
+                array(
+                    'uri' => 'ldaps://ldap.example.org',
+                    'enable_tls' => false,
+                    'referrals' => false,
+                ),
+            );
             'dnpattern' => 'uid=%username%,ou=employees,dc=example,dc=org',
         ),
 
         'students' => array(
             'description' => 'Students',
 
-            'hostname' => 'ldap.students.example.org',
+            'servers' => array(
+                array(
+                    'uri' => 'ldaps://ldap.example.org',
+                    'enable_tls' => false,
+                    'referrals' => false,
+                ),
+            );
             'dnpattern' => 'uid=%username%,ou=students,dc=example,dc=org',
         ),
 
