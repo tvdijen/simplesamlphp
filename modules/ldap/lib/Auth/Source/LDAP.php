@@ -10,7 +10,8 @@
  *
  * @package SimpleSAMLphp
  */
-class sspmod_ldap_Auth_Source_LDAP extends sspmod_core_Auth_UserPassBase {
+class sspmod_ldap_Auth_Source_LDAP extends sspmod_core_Auth_UserPassBase
+{
 
 	/**
 	 * A LDAP configuration object.
@@ -24,7 +25,8 @@ class sspmod_ldap_Auth_Source_LDAP extends sspmod_core_Auth_UserPassBase {
 	 * @param array $info  Information about this authentication source.
 	 * @param array $config  Configuration.
 	 */
-	public function __construct($info, $config) {
+	public function __construct($info, $config)
+	{
 		assert('is_array($info)');
 		assert('is_array($config)');
 
@@ -44,7 +46,8 @@ class sspmod_ldap_Auth_Source_LDAP extends sspmod_core_Auth_UserPassBase {
 	 * param array $sasl_arg  Associative array of SASL options
 	 * @return array  Associative array with the users attributes.
 	 */
-	protected function login($username, $password, array $sasl_args = null) {
+	protected function login($username, $password, array $sasl_args = null)
+	{
 		assert('is_string($username)');
 		assert('is_string($password)');
 
