@@ -8,7 +8,8 @@
  * @author Ryan Panning <panman@traileyes.com>
  * @package SimpleSAMLphp
  */
-abstract class sspmod_ldap_Auth_Process_BaseFilter extends SimpleSAML_Auth_ProcessingFilter {
+abstract class sspmod_ldap_Auth_Process_BaseFilter extends SimpleSAML_Auth_ProcessingFilter
+{
 
 	/**
 	 * List of attribute "alias's" linked to the real attribute
@@ -86,7 +87,8 @@ abstract class sspmod_ldap_Auth_Process_BaseFilter extends SimpleSAML_Auth_Proce
 	 * @param array $config
 	 * @param $reserved
 	 */
-	public function __construct(&$config, $reserved) {
+	public function __construct(&$config, $reserved)
+	{
 		parent::__construct($config, $reserved);
 
 		// Change the class $title to match it's true name
@@ -135,14 +137,12 @@ abstract class sspmod_ldap_Auth_Process_BaseFilter extends SimpleSAML_Auth_Proce
 
 			// Build the authsource config
 			$authconfig = array();
-			$authconfig['ldap.hostname']   = @$authsource['hostname'];
-			$authconfig['ldap.enable_tls'] = @$authsource['enable_tls'];
-			$authconfig['ldap.port']       = @$authsource['port'];
-			$authconfig['ldap.timeout']    = @$authsource['timeout'];
+			$authconfig['ldap.servers']    = @$authsource['servers'];
 			$authconfig['ldap.debug']      = @$authsource['debug'];
-			$authconfig['ldap.basedn']     = (@$authsource['search.enable'] ? @$authsource['search.base'] : NULL);
-			$authconfig['ldap.username']   = (@$authsource['search.enable'] ? @$authsource['search.username'] : NULL);
-			$authconfig['ldap.password']   = (@$authsource['search.enable'] ? @$authsource['search.password'] : NULL);
+			$authconfig['ldap.timeout']    = @$authsource['timeout'];
+			$authconfig['ldap.basedn']     = (@$authsource['search.enable'] ? @$authsource['search.base'] : null);
+			$authconfig['ldap.username']   = (@$authsource['search.enable'] ? @$authsource['search.username'] : null);
+			$authconfig['ldap.password']   = (@$authsource['search.enable'] ? @$authsource['search.password'] : null);
 			$authconfig['ldap.username']   = (@$authsource['priv.read'] ? @$authsource['priv.username'] : $authconfig['ldap.username']);
 			$authconfig['ldap.password']   = (@$authsource['priv.read'] ? @$authsource['priv.password'] : $authconfig['ldap.password']);
 
@@ -220,7 +220,8 @@ abstract class sspmod_ldap_Auth_Process_BaseFilter extends SimpleSAML_Auth_Proce
 	 *
 	 * @return sspmod_ldap_LdapConnection
 	 */
-	protected function getLdap() {
+	protected function getLdap()
+	{
 
 		// Check if already connected
 		if ($this->ldap) {
@@ -228,32 +229,42 @@ abstract class sspmod_ldap_Auth_Process_BaseFilter extends SimpleSAML_Auth_Proce
 		}
 
 		// Get the connection specific options
-		$hostname   = $this->config->getString('ldap.hostname');
-		$port       = $this->config->getInteger('ldap.port', 389);
-		$enable_tls = $this->config->getBoolean('ldap.enable_tls', FALSE);
-		$debug      = $this->config->getBoolean('ldap.debug', FALSE);
-		$timeout    = $this->config->getInteger('ldap.timeout', 0);
-		$username   = $this->config->getString('ldap.username', NULL);
-		$password   = $this->config->getString('ldap.password', NULL);
+		$servers    = $this->config->getString('ldap.servers');
+		$debug      = $this->config->getBoolean('ldap.debug', false);
+		$timeout    = $this->config->getBoolean('ldap.timeout', 0);
+		$username   = $this->config->getString('ldap.username', null);
+		$password   = $this->config->getString('ldap.password', null);
 
-		// Log the LDAP connection
-		SimpleSAML\Logger::debug(
-			$this->title . 'Connecting to LDAP server;' .
-			' Hostname: ' . $hostname .
-			' Port: ' . $port .
-			' Enable TLS: ' . ($enable_tls ? 'Yes' : 'No') .
-			' Debug: ' . ($debug ? 'Yes' : 'No') .
-			' Timeout: ' . $timeout .
-			' Username: ' . $username .
-			' Password: ' . str_repeat('*', strlen($password))
-		);
+        foreach ($servers as $server) {
+		    // Log the LDAP connection
+		    $uri = $server['uri'];
+		    $enable_tls = isSet($server['enable_tls']) ? $server['enable_tls'] : false;
+		    $server_timeout = isSet($server['timeout']) ? $server['timeout'] : $timeout;
+		    $server_debug = isSet($server['debug']) ? $server['debug'] : $debug;
+		    $server_username = isSet($server['username']) ? $server['username'] : $username;
+		    $server_password = isSet($server['password']) ? $server['password'] : $password;
+		    
+		    SimpleSAML\Logger::debug(
+			    $this->title . 'Connecting to LDAP server;' .
+			    ' Hostname: ' . $server_uri .
+			    ' Enable TLS: ' . $enable_tls ? 'Yes' : 'No') .
+			    ' Debug: ' . ($debug ? 'Yes' : 'No') .
+			    ' Timeout: ' . $server_timeout .
+			    ' Username: ' . $server_username .
+			    ' Password: ' . str_repeat('*', strlen($server_password))
+		    );
 
-		// Connect to the LDAP server to be queried during processing
-		$this->ldap = new SimpleSAML_Auth_LDAP($hostname, $enable_tls, $debug, $timeout, $port);
-		$this->ldap->bind($username, $password);
+		    // Connect to the LDAP server to be queried during processing
+		    $this->ldap = new SimpleSAML_Auth_LDAP($uri, $enable_tls, $server_debug, $server_timeout, $server_port);
+		    $this->ldap->bind($server_username, $server_password);
 
-		// All done
-		return $this->ldap;
+		    // All done
+		    if (this->ldap) {
+		        return $this->ldap
+		    }
+        }
+        return false;
+		    
 	}
 
 
@@ -266,8 +277,9 @@ abstract class sspmod_ldap_Auth_Process_BaseFilter extends SimpleSAML_Auth_Proce
 	 * @param mixed $value
 	 * @return string
 	 */
-	protected function var_export($value) {
-		$export = var_export($value, TRUE);
+	protected function var_export($value)
+	{
+		$export = var_export($value, true);
 		$lines = explode("\n", $export);
 		foreach ($lines as &$line) {
 			$line = trim($line);
