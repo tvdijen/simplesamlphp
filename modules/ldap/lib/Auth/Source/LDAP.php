@@ -32,7 +32,7 @@ class sspmod_ldap_Auth_Source_LDAP extends sspmod_core_Auth_UserPassBase {
 		parent::__construct($info, $config);
 
 		$this->ldapConfig = new sspmod_ldap_ConfigHelper($config,
-			'Authentication source ' . var_export($this->authId, TRUE));
+			'Authentication source ' . var_export($this->authId, true));
 	}
 
 
@@ -44,7 +44,7 @@ class sspmod_ldap_Auth_Source_LDAP extends sspmod_core_Auth_UserPassBase {
 	 * param array $sasl_arg  Associative array of SASL options
 	 * @return array  Associative array with the users attributes.
 	 */
-	protected function login($username, $password, array $sasl_args = NULL) {
+	protected function login($username, $password, array $sasl_args = null) {
 		assert('is_string($username)');
 		assert('is_string($password)');
 
