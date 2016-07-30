@@ -19,15 +19,9 @@ class sspmod_ldap_ConfigHelper {
 
 
 	/**
-	 * The hostname of the LDAP server.
+	 * An array of LDAP-servers we can approach.
 	 */
-	private $hostname;
-
-
-	/**
-	 * Whether we should use TLS/SSL when contacting the LDAP server.
-	 */
-	private $enableTLS;
+	private $servers;
 
 
 	/**
@@ -36,26 +30,6 @@ class sspmod_ldap_ConfigHelper {
 	 * @var bool
 	 */
 	private $debug;
-
-
-	/**
-	 * The timeout for accessing the LDAP server.
-	 *
-	 * @var int
-	 */
-	private $timeout;
-
-	/**
-	 * The port used when accessing the LDAP server.
-	 *
-	 * @var int
-	 */
-	private $port;
-
-	/**
-	 * Whether to follow referrals
-	 */
-	private $referrals;
 
 
 	/**
@@ -137,12 +111,8 @@ class sspmod_ldap_ConfigHelper {
 		// Parse configuration
 		$config = SimpleSAML_Configuration::loadFromArray($config, $location);
 
-		$this->hostname = $config->getString('hostname');
-		$this->enableTLS = $config->getBoolean('enable_tls', FALSE);
+		$this->servers = $config->getArray('servers');
 		$this->debug = $config->getBoolean('debug', FALSE);
-		$this->timeout = $config->getInteger('timeout', 0);
-		$this->port = $config->getInteger('port', 389);
-		$this->referrals = $config->getBoolean('referrals', TRUE);
 		$this->searchEnable = $config->getBoolean('search.enable', FALSE);
 		$this->privRead = $config->getBoolean('priv.read', FALSE);
 
@@ -190,7 +160,7 @@ class sspmod_ldap_ConfigHelper {
 			throw new SimpleSAML_Error_Error('WRONGUSERPASS');
 		}
 
-		$ldap = new SimpleSAML_Auth_LDAP($this->hostname, $this->enableTLS, $this->debug, $this->timeout, $this->port, $this->referrals);
+		$ldap = new SimpleSAML_Auth_LDAP($this->servers, $this->debug);
 
 		if (!$this->searchEnable) {
 			$ldapusername = addcslashes($username, ',+"\\<>;*');
@@ -254,12 +224,7 @@ class sspmod_ldap_ConfigHelper {
 	 *
 	 */
 	public function searchfordn($attribute, $value, $allowZeroHits) {
-		$ldap = new SimpleSAML_Auth_LDAP($this->hostname,
-			$this->enableTLS,
-			$this->debug,
-			$this->timeout,
-			$this->port,
-			$this->referrals);
+		$ldap = new SimpleSAML_Auth_LDAP($this->servers, $this->debug);
 
 		if ($attribute == NULL)
 			$attribute = $this->searchAttributes;
@@ -278,12 +243,7 @@ class sspmod_ldap_ConfigHelper {
 		if ($attributes == NULL)
 			$attributes = $this->attributes;
 
-		$ldap = new SimpleSAML_Auth_LDAP($this->hostname,
-			$this->enableTLS,
-			$this->debug,
-			$this->timeout,
-			$this->port,
-			$this->referrals);
+		$ldap = new SimpleSAML_Auth_LDAP($this->servers, $this->debug);
 
 		/* Are privs needed to get the attributes? */
 		if ($this->privRead) {
