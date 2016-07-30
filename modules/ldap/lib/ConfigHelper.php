@@ -73,7 +73,7 @@ class sspmod_ldap_ConfigHelper {
 
 
 	/**
-	 * The attributes we should fetch. Can be NULL in which case we will fetch all attributes.
+	 * The attributes we should fetch. Can be null in which case we will fetch all attributes.
 	 */
 	private $attributes;
 
@@ -112,13 +112,13 @@ class sspmod_ldap_ConfigHelper {
 		$config = SimpleSAML_Configuration::loadFromArray($config, $location);
 
 		$this->servers = $config->getArray('servers');
-		$this->debug = $config->getBoolean('debug', FALSE);
-		$this->searchEnable = $config->getBoolean('search.enable', FALSE);
-		$this->privRead = $config->getBoolean('priv.read', FALSE);
+		$this->debug = $config->getBoolean('debug', false);
+		$this->searchEnable = $config->getBoolean('search.enable', false);
+		$this->privRead = $config->getBoolean('priv.read', false);
 
 		if ($this->searchEnable) {
-			$this->searchUsername = $config->getString('search.username', NULL);
-			if ($this->searchUsername !== NULL) {
+			$this->searchUsername = $config->getString('search.username', null);
+			if ($this->searchUsername !== null) {
 				$this->searchPassword = $config->getString('search.password');
 			}
 
@@ -136,7 +136,7 @@ class sspmod_ldap_ConfigHelper {
 			$this->privPassword = $config->getString('priv.password');
 		}
 
-		$this->attributes = $config->getArray('attributes', NULL);
+		$this->attributes = $config->getArray('attributes', null);
 	}
 
 
@@ -151,7 +151,7 @@ class sspmod_ldap_ConfigHelper {
 	 * @param arrray $sasl_args  Array of SASL options for LDAP bind.
 	 * @return array  Associative array with the users attributes.
 	 */
-	public function login($username, $password, array $sasl_args = NULL) {
+	public function login($username, $password, array $sasl_args = null) {
 		assert('is_string($username)');
 		assert('is_string($password)');
 
@@ -166,14 +166,14 @@ class sspmod_ldap_ConfigHelper {
 			$ldapusername = addcslashes($username, ',+"\\<>;*');
 			$dn = str_replace('%username%', $ldapusername, $this->dnPattern);
 		} else {
-			if ($this->searchUsername !== NULL) {
+			if ($this->searchUsername !== null) {
 				if(!$ldap->bind($this->searchUsername, $this->searchPassword)) {
 					throw new Exception('Error authenticating using search username & password.');
 				}
 			}
 
-			$dn = $ldap->searchfordn($this->searchBase, $this->searchAttributes, $username, TRUE, $this->searchFilter);
-			if ($dn === NULL) {
+			$dn = $ldap->searchfordn($this->searchBase, $this->searchAttributes, $username, true, $this->searchFilter);
+			if ($dn === null) {
 				/* User not found with search. */
 				SimpleSAML\Logger::info($this->location . ': Unable to find users DN. username=\'' . $username . '\'');
 				throw new SimpleSAML_Error_Error('WRONGUSERPASS');
@@ -226,10 +226,10 @@ class sspmod_ldap_ConfigHelper {
 	public function searchfordn($attribute, $value, $allowZeroHits) {
 		$ldap = new SimpleSAML_Auth_LDAP($this->servers, $this->debug);
 
-		if ($attribute == NULL)
+		if ($attribute === null)
 			$attribute = $this->searchAttributes;
 
-		if ($this->searchUsername !== NULL) {
+		if ($this->searchUsername !== null) {
 			if(!$ldap->bind($this->searchUsername, $this->searchPassword)) {
 				throw new Exception('Error authenticating using search username & password.');
 			}
@@ -239,8 +239,8 @@ class sspmod_ldap_ConfigHelper {
 			$value, $allowZeroHits);
 	}
 
-	public function getAttributes($dn, $attributes = NULL) {
-		if ($attributes == NULL)
+	public function getAttributes($dn, $attributes = null) {
+		if ($attributes === null)
 			$attributes = $this->attributes;
 
 		$ldap = new SimpleSAML_Auth_LDAP($this->servers, $this->debug);
