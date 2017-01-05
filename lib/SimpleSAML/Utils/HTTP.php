@@ -641,6 +641,13 @@ class HTTP
      */
     public static function getSelfURL()
     {
+        if (!isset($_SERVER['REQUEST_URI'])) {
+            $_SERVER['REQUEST_URI'] = substr($_SERVER['PHP_SELF'], 1);
+            if (isset($_SERVER['QUERY_STRING'])) {
+                $_SERVER['REQUEST_URI'] . ='?' . $_SERVER['QUERY_STRING'];
+            }
+        }
+        
         $cfg = \SimpleSAML_Configuration::getInstance();
         $baseDir = $cfg->getBaseDir();
         $cur_path = realpath($_SERVER['SCRIPT_FILENAME']);
