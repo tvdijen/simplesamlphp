@@ -1,5 +1,7 @@
 <?php
 
+namespace SimpleSAML\Utils;
+
 /**
  * Constants defining possible errors
  */
@@ -22,7 +24,8 @@ if (!defined('LDAP_OPT_DIAGNOSTIC_MESSAGE')) {
  * @author Anders Lund, UNINETT AS. <anders.lund@uninett.no>
  * @package SimpleSAMLphp
  */
-class SimpleSAML_Auth_LDAP
+
+class LDAP
 {
     /**
      * LDAP link identifier.
@@ -58,7 +61,7 @@ class SimpleSAML_Auth_LDAP
     {
 
         // Debug
-        SimpleSAML\Logger::debug('Library - LDAP __construct(): Setup LDAP with ' .
+        \SimpleSAML\Logger::debug('Library - LDAP __construct(): Setup LDAP with ' .
                         'host=\'' . $hostname .
                         '\', tls=' . var_export($enable_tls, true) .
                         ', debug=' . var_export($debug, true) .
@@ -72,7 +75,7 @@ class SimpleSAML_Auth_LDAP
          * OpenLDAP 2.x.x or Netscape Directory SDK x.x needed for this option.
          */
         if ($debug && !ldap_set_option(null, LDAP_OPT_DEBUG_LEVEL, 7)) {
-                SimpleSAML\Logger::warning('Library - LDAP __construct(): Unable to set debug level (LDAP_OPT_DEBUG_LEVEL) to 7');
+                \SimpleSAML\Logger::warning('Library - LDAP __construct(): Unable to set debug level (LDAP_OPT_DEBUG_LEVEL) to 7');
         }
 
         /*
@@ -99,10 +102,10 @@ class SimpleSAML_Auth_LDAP
         $this->timeout = $timeout;
         if ($timeout > 0) {
             if (!@ldap_set_option($this->ldap, LDAP_OPT_NETWORK_TIMEOUT, $timeout)) {
-                SimpleSAML\Logger::warning('Library - LDAP __construct(): Unable to set timeouts (LDAP_OPT_NETWORK_TIMEOUT) to ' . $timeout);
+                \SimpleSAML\Logger::warning('Library - LDAP __construct(): Unable to set timeouts (LDAP_OPT_NETWORK_TIMEOUT) to ' . $timeout);
             }
             if (!@ldap_set_option($this->ldap, LDAP_OPT_TIMELIMIT, $timeout)) {
-                SimpleSAML\Logger::warning('Library - LDAP __construct(): Unable to set timeouts (LDAP_OPT_TIMELIMIT) to ' . $timeout);
+                \SimpleSAML\Logger::warning('Library - LDAP __construct(): Unable to set timeouts (LDAP_OPT_TIMELIMIT) to ' . $timeout);
             }
         }
 
@@ -129,7 +132,7 @@ class SimpleSAML_Auth_LDAP
 
         // Log LDAP code and description, if possible
         if (empty($this->ldap)) {
-            SimpleSAML\Logger::error($description);
+            \SimpleSAML\Logger::error($description);
         } else {
             $errNo = @ldap_errno($this->ldap);
         }
@@ -138,9 +141,9 @@ class SimpleSAML_Auth_LDAP
         if ($type) {
             if ($errNo !== 0) {
                 // Only log real LDAP errors; not success
-                SimpleSAML\Logger::error($description . '; cause: \'' . ldap_error($this->ldap) . '\' (0x' . dechex($errNo) . ')');
+                \SimpleSAML\Logger::error($description . '; cause: \'' . ldap_error($this->ldap) . '\' (0x' . dechex($errNo) . ')');
             } else {
-                SimpleSAML\Logger::error($description);
+                \SimpleSAML\Logger::error($description);
             }
 
             switch ($type) {
@@ -164,16 +167,16 @@ class SimpleSAML_Auth_LDAP
             }
             switch ($errNo) {
                 case 0x20://LDAP_NO_SUCH_OBJECT
-                    SimpleSAML\Logger::warning($description);
+                    \SimpleSAML\Logger::warning($description);
                     return new SimpleSAML_Error_UserNotFound($description, $errNo);
                 case 0x31://LDAP_INVALID_CREDENTIALS
-                    SimpleSAML\Logger::info($description);
+                    \SimpleSAML\Logger::info($description);
                     return new SimpleSAML_Error_InvalidCredential($description, $errNo);
                 case -1://NO_SERVER_CONNECTION
-                    SimpleSAML\Logger::error($description);
+                    \SimpleSAML\Logger::error($description);
                     return new SimpleSAML_Error_AuthSource('ldap', $description);
                 default:
-                    SimpleSAML\Logger::error($description);
+                    \SimpleSAML\Logger::error($description);
                     return new SimpleSAML_Error_AuthSource('ldap', $description);
             }
         }
@@ -220,7 +223,7 @@ class SimpleSAML_Auth_LDAP
         }
 
         // Search using generated filter
-        SimpleSAML\Logger::debug('Library - LDAP search(): Searching base \'' . $base . '\' for \'' . $filter . '\'');
+        \SimpleSAML\Logger::debug('Library - LDAP search(): Searching base \'' . $base . '\' for \'' . $filter . '\'');
         // TODO: Should aliases be dereferenced?
         $result = @ldap_search($this->ldap, $base, $filter, array(), 0, 0, $this->timeout);
         if ($result === false) {
@@ -280,7 +283,7 @@ class SimpleSAML_Auth_LDAP
     public function searchfordn($base, $attribute, $value, $allowZeroHits = false, $searchFilter = null)
     {
         // Traverse all search bases, returning DN if found
-        $bases = SimpleSAML\Utils\Arrays::arrayize($base);
+        $bases = Arrays::arrayize($base);
         $result = null;
         foreach ($bases as $current) {
             try {
@@ -297,7 +300,7 @@ class SimpleSAML_Auth_LDAP
             }
         }
         // Decide what to do for zero entries
-        SimpleSAML\Logger::debug('Library - LDAP searchfordn(): No entries found');
+        \SimpleSAML\Logger::debug('Library - LDAP searchfordn(): No entries found');
         if ($allowZeroHits) {
             // Zero hits allowed
             return null;
@@ -452,7 +455,7 @@ class SimpleSAML_Auth_LDAP
         if ($error === true) {
             // Good
             $this->authz_id = $authz_id;
-            SimpleSAML\Logger::debug('Library - LDAP bind(): Bind successful with DN \'' . $dn . '\'');
+            \SimpleSAML\Logger::debug('Library - LDAP bind(): Bind successful with DN \'' . $dn . '\'');
             return true;
         }
 
@@ -499,7 +502,7 @@ class SimpleSAML_Auth_LDAP
         }
 
         // Log debug message
-        SimpleSAML\Logger::debug(
+        \SimpleSAML\Logger::debug(
             'ldap:LdapConnection->setOption : Set the LDAP option [' .
             $option . '] with the value [' . $value . ']'
         );
@@ -533,7 +536,7 @@ class SimpleSAML_Auth_LDAP
             // TODO: Verify that this originally was the intended behaviour. Could $attributes be a string?
             $attributes = array();
         }
-        SimpleSAML\Logger::debug('Library - LDAP getAttributes(): Getting ' . $description . ' from DN \'' . $dn . '\'');
+        \SimpleSAML\Logger::debug('Library - LDAP getAttributes(): Getting ' . $description . ' from DN \'' . $dn . '\'');
 
         // Attempt to get attributes
         // TODO: Should aliases be dereferenced?
@@ -565,7 +568,7 @@ class SimpleSAML_Auth_LDAP
 
                 if (!empty($maxsize) && strlen($value) >= $maxsize) {
                     // Ignoring and warning
-                    SimpleSAML\Logger::warning('Library - LDAP getAttributes(): Attribute \'' .
+                    \SimpleSAML\Logger::warning('Library - LDAP getAttributes(): Attribute \'' .
                         $name . '\' exceeded maximum allowed size by ' + ($maxsize - strlen($value)));
                     continue;
                 }
@@ -585,7 +588,7 @@ class SimpleSAML_Auth_LDAP
         }
 
         // We're done
-        SimpleSAML\Logger::debug('Library - LDAP getAttributes(): Found attributes \'(' . join(',', array_keys($result)) . ')\'');
+        \SimpleSAML\Logger::debug('Library - LDAP getAttributes(): Found attributes \'(' . join(',', array_keys($result)) . ')\'');
         return $result;
     }
 
@@ -621,7 +624,7 @@ class SimpleSAML_Auth_LDAP
             // escape characters with a special meaning, also in the password
             $password = addcslashes($password, ',+"\\<>;*');
             if (!$this->bind($dn, $password)) {
-                SimpleSAML\Logger::info('Library - LDAP validate(): Failed to authenticate \''. $username . '\' using DN \'' . $dn . '\'');
+                \SimpleSAML\Logger::info('Library - LDAP validate(): Failed to authenticate \''. $username . '\' using DN \'' . $dn . '\'');
                 return false;
             }
         }

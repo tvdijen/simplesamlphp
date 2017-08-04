@@ -279,7 +279,7 @@ abstract class sspmod_ldap_Auth_Process_BaseFilter extends SimpleSAML_Auth_Proce
         );
 
         // Connect to the LDAP server to be queried during processing
-        $this->ldap = new SimpleSAML_Auth_LDAP($hostname, $enable_tls, $debug, $timeout, $port);
+        $this->ldap = new \SimpleSAML\Utils\LDAP($hostname, $enable_tls, $debug, $timeout, $port);
         $this->ldap->bind($username, $password);
 
         // All done
