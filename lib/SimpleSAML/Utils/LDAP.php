@@ -283,7 +283,7 @@ class LDAP
     public function searchfordn($base, $attribute, $value, $allowZeroHits = false, $searchFilter = null)
     {
         // Traverse all search bases, returning DN if found
-        $bases = Arrays::arrayize($base);
+        $bases = \SimpleSAML\Utils\Arrays::arrayize($base);
         $result = null;
         foreach ($bases as $current) {
             try {
