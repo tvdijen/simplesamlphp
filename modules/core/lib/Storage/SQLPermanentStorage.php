@@ -210,8 +210,7 @@ class sspmod_core_Storage_SQLPermanentStorage
         }
         if (count($conditions) === 0) {
             return '1';
-	}	
-
+        }
         return join(' AND ', $conditions);
     }
 }
