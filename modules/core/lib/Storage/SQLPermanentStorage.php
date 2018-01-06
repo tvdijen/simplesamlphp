@@ -13,7 +13,7 @@ class sspmod_core_Storage_SQLPermanentStorage
 {
     private $db;
 
-    function __construct($name, $config = null)
+    public function __construct($name, $config = null)
     {
         if (is_null($config)) {
             $config = SimpleSAML_Configuration::getInstance();
