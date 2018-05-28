@@ -1,7 +1,7 @@
 <?php
 
-class sspmod_smartattributes_Auth_Process_SmartID extends SimpleSAML_Auth_ProcessingFilter {
-
+class sspmod_smartattributes_Auth_Process_SmartID extends SimpleSAML_Auth_ProcessingFilter
+{
 	/**
 	 * Which attributes to use as identifiers?
 	 *
@@ -44,7 +44,8 @@ class sspmod_smartattributes_Auth_Process_SmartID extends SimpleSAML_Auth_Proces
 	private $attributes = array();
 
 
-	public function __construct($config, $reserved) {
+	public function __construct($config, $reserved)
+    {
 		parent::__construct($config, $reserved);
 
 		assert(is_array($config));
@@ -79,12 +80,13 @@ class sspmod_smartattributes_Auth_Process_SmartID extends SimpleSAML_Auth_Proces
 
 	}
 
-	private function addID($attributes, $request) {
+	private function addID($attributes, $request)
+    {
         $state = $request['saml:sp:State'];
 		foreach ($this->_candidates as $idCandidate) {
 			if (isset($attributes[$idCandidate][0])) {
-				if(($this->_add_authority) && (isset($state['saml:AuthenticatingAuthority'][0]))) {
-					return ($this->_add_candidate ? $idCandidate.':' : '').$attributes[$idCandidate][0] . '!' . $state['saml:AuthenticatingAuthority'][0];
+				if (($this->_add_authority) && (isset($state['saml:AuthenticatingAuthority'][0]))) {
+					return ($this->_add_candidate ? $idCandidate.':' : '').$attributes[$idCandidate][0].'!'.$state['saml:AuthenticatingAuthority'][0];
 				} else {
 					return ($this->_add_candidate ? $idCandidate.':' : '').$attributes[$idCandidate][0];
 				}
@@ -107,12 +109,15 @@ class sspmod_smartattributes_Auth_Process_SmartID extends SimpleSAML_Auth_Proces
 	 *
 	 * @param array &$request  The current request
 	 */
-	public function process(&$request) {
+	public function process(&$request)
+    {
 		assert(is_array($request));
 		assert(array_key_exists('Attributes', $request));
 
-		$ID = $this->addID($request['Attributes'], $request);
+		$id = $this->addID($request['Attributes'], $request);
 
-		if(isset($ID)) $request['Attributes'][$this->_id_attribute] = array($ID);
+		if (isset($id)) {
+            $request['Attributes'][$this->_id_attribute] = array($id);
+        }
 	}
 }
