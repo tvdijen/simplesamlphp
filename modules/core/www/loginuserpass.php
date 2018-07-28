@@ -25,7 +25,7 @@ if ($source === null) {
 if (array_key_exists('username', $_REQUEST)) {
     $username = $_REQUEST['username'];
 } elseif ($source->getRememberUsernameEnabled() && array_key_exists($source->getAuthId().'-username', $_COOKIE)) {
-    $username = $_COOKIE[$source->getAuthId() . '-username'];
+    $username = $_COOKIE[$source->getAuthId().'-username'];
 } elseif (isset($state['core:username'])) {
     $username = (string) $state['core:username'];
 } else {
