@@ -337,13 +337,30 @@ class AuthnResponse
 
         $audience = $sp->getString('audience', $spEntityId);
         $base64 = $sp->getBoolean('base64attributes', false);
-
         $namequalifier = $sp->getString('NameQualifier', $spEntityId);
-        $nameid = Random::generateID();
+
+        $nameidattribute = $sp->getString('simplesaml.nameidattribute', null);
+        if ($nameidattribute === null) {
+            \SimpleSAML\Logger::error('Unable to generate NameID. Check the simplesaml.nameidattribute option.');
+            return null;
+        } else {
+            if (!array_key_exists($nameidattribute, $attributes)) {
+                \SimpleSAML\Logger::error(
+                    'Unable to add NameID: Missing '.var_export($nameidattribute, true).
+                        ' in the attributes of the user.'
+                );
+                return null;
+            }
+            $nameid = $attributes[$nameidattribute][0];
+            \SimpleSAML\Logger::debug('NameID: '.$nameidattribute.' = '.$nameid);
+        }
+        $nameidformat = $sp->getString('NameIDFormat', 'urn:mace:shibboleth:1.0:nameIdentifier');
+        \SimpleSAML\Logger::debug('NameIDFormat: '.$nameidformat);
+
         $subjectNode =
             '<Subject>'.
             '<NameIdentifier'.
-            ' Format="urn:mace:shibboleth:1.0:nameIdentifier"'.
+            ' Format="'.$nameidformat.'"'.
             ' NameQualifier="'.htmlspecialchars($namequalifier).'"'.
             '>'.
             htmlspecialchars($nameid).
