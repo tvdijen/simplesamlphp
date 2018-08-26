@@ -60,6 +60,11 @@ class AuthnResponse
     }
 
 
+    /**
+     * @param string $xml
+     *
+     * @throws \Exception If the XML won't parse
+     */
     public function setXML($xml)
     {
         assert(is_string($xml));
@@ -71,16 +76,27 @@ class AuthnResponse
         }
     }
 
+    /**
+     * @param string $relayState
+     */
     public function setRelayState($relayState)
     {
         $this->relayState = $relayState;
     }
 
+    /**
+     * @return string
+     */
     public function getRelayState()
     {
         return $this->relayState;
     }
 
+    /**
+     * @return true
+     *
+     * @throws \SimpleSAML\Error\Exception if no certificate is available
+     */
     public function validate()
     {
         assert($this->dom instanceof DOMDocument);
@@ -199,7 +215,10 @@ class AuthnResponse
         return null;
     }
 
-    
+    /**
+     * @return array
+     * @throws \Exception when assertion is unsigned or attribute has no attributeName
+     */
     public function getAttributes()
     {
         $metadata = \SimpleSAML\Metadata\MetaDataStorageHandler::getMetadataHandler();
@@ -271,7 +290,10 @@ class AuthnResponse
         return $attributes;
     }
 
-    
+    /**
+     * @return string
+     * @throws \Exception if response contains no Issuer field
+     */    
     public function getIssuer()
     {
         $query = '/shibp:Response/shib:Assertion/@Issuer';
@@ -284,6 +306,9 @@ class AuthnResponse
         }
     }
 
+    /**
+     * @return array
+     */
     public function getNameID()
     {
         $nameID = array();
