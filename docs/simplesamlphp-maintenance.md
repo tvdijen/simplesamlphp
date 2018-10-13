@@ -163,6 +163,11 @@ To store sessions in Redis, set the `store.type` option to `redis`.
 
 By default SimpleSAMLphp will attempt to connect to Redis on the `localhost` at port `6379`. These can be configured via the `store.redis.host` and `store.redis.port` options, respectively. You may also set a key prefix with the `store.redis.prefix` option. For Redis instances that [require authentication](https://redis.io/commands/auth), use the `store.redis.password` option.
 
+### Configuring Redis Sentinel storage
+
+Configure your sentinels by setting `store.redis.sentinels` to `['tcp://[yoursentinel1]:[port]', 'tcp://[yoursentinel2]:[port]', 'tcp://[yoursentinel3]:[port]']`.
+Configure your master group by setting `store.redis.mastergroup` (`mymaster` by default)
+
 ## Metadata storage
 
 Several metadata storage backends are available by default, including `flatfile`, `serialize`, `mdq` and

@@ -42,17 +42,31 @@ class Redis extends Store
             $password = $config->getString('store.redis.password', '');
             $database = $config->getInteger('store.redis.database', 0);
 
-            $redis = new Client(
-                [
-                    'scheme' => 'tcp',
-                    'host' => $host,
-                    'port' => $port,
-                    'database' => $database,
-                ] + (!empty($password) ? ['password' => $password] : []),
-                [
-                    'prefix' => $prefix,
-                ]
-            );
+            $sentinels = $config->getArray('store.redis.sentinels', []);
+
+            if (empty($sentinels)) {
+                $redis = new Client(
+                    [
+                        'scheme' => 'tcp',
+                        'host' => $host,
+                        'port' => $port,
+                        'database' => $database,
+                    ] + (!empty($password) ? ['password' => $password] : []),
+                    [
+                       'prefix' => $prefix,
+                    ]
+                );
+            } else {
+                $mastergroup = $config->getString('store.redis.mastergroup', 'mymaster');
+                $redis = new \Predis\Client(
+                    $sentinels,
+                    [
+                        'replication' => 'sentinel',
+                        'service' => $mastergroup,
+                        'prefix' => $prefix,
+                    ]
+                );
+            }
         }
 
         $this->redis = $redis;
