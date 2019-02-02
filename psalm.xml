@@ -3,15 +3,22 @@
     name="SimpleSAMLphp"
     useDocblockTypes="true"
     totallyTyped="false"
+    hideExternalErrors="true"
 >
     <projectFiles>
-        <directory name="lib/SimpleSAML/Utils" />
+        <directory name="modules" />
+        <directory name="lib/SimpleSAML" />
+
+        <ignoreFiles>
+            <directory name="vendor" />
+        </ignoreFiles>
     </projectFiles>
 
     <issueHandlers>
         <LessSpecificReturnType errorLevel="info" />
 
         <!-- level 3 issues - slightly lazy code writing, but probably low false-negatives -->
+        <DeprecatedClass errorLevel="info" />
         <DeprecatedMethod errorLevel="info" />
 
         <MissingClosureReturnType errorLevel="info" />
