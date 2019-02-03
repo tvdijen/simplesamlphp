@@ -48,6 +48,7 @@ class Server
      * Initialize a CDC server.
      *
      * @param string $domain  The domain we are a server for.
+     * @throws \SimpleSAML\Error\Exception
      */
     public function __construct($domain)
     {
@@ -77,6 +78,7 @@ class Server
      * Send a request to this CDC server.
      *
      * @param array $request  The CDC request.
+     * @return void
      */
     public function sendRequest(array $request)
     {
@@ -91,7 +93,8 @@ class Server
     /**
      * Parse and validate response received from a CDC server.
      *
-     * @return array|NULL  The response, or NULL if no response is received.
+     * @return array|null  The response, or NULL if no response is received.
+     * @throws \SimpleSAML\Error\Exception
      */
     public function getResponse()
     {
@@ -112,6 +115,8 @@ class Server
 
     /**
      * Parse and process a CDC request.
+     * @return void
+     * @throws \SimpleSAML\Error\BadRequest
      */
     public static function processRequest()
     {
@@ -132,6 +137,8 @@ class Server
      * Handle a parsed CDC requst.
      *
      * @param array $request
+     * @return void
+     * @throws \SimpleSAML\Error\BadRequest
      */
     private function handleRequest(array $request)
     {
@@ -182,6 +189,7 @@ class Server
      *
      * @param array $request  The request.
      * @return string The response.
+     * @throws \SimpleSAML\Error\BadRequest
      */
     private function handleAppend(array $request)
     {
@@ -245,7 +253,8 @@ class Server
      * Helper function for parsing and validating a CDC message.
      *
      * @param string $parameter  The name of the query parameter.
-     * @return array|NULL  The response, or NULL if no response is received.
+     * @return array|null  The response, or NULL if no response is received.
+     * @throws \SimpleSAML\Error\BadRequest
      */
     private static function get($parameter)
     {
@@ -292,6 +301,8 @@ class Server
      * Will throw an exception if the message is invalid.
      *
      * @param string $parameter  The name of the query parameter.
+     * @return void
+     * @throws \SimpleSAML\Error\BadRequest
      */
     private function validate($parameter)
     {
@@ -318,6 +329,7 @@ class Server
      * @param string $to  The URL the message should be delivered to.
      * @param string $parameter  The query parameter the message should be sent in.
      * @param array $message  The CDC message.
+     * @return void
      */
     private function send($to, $parameter, array $message)
     {
