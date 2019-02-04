@@ -33,4 +33,8 @@
         <UnusedClass errorLevel="info" />
         <PossiblyUnusedMethod errorLevel="info" />
     </issueHandlers>
+
+    <stubs>
+        <file name="tests/Utils/Stubs/krb5.php" />
+    </stubs>
 </psalm>
