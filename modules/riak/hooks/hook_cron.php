@@ -28,6 +28,7 @@ namespace SimpleSAML\Module\riak;
  * Hook to run a cron job.
  *
  * @param array &$croninfo  Output
+ * @return void
  */
 function riak_hook_cron(&$croninfo)
 {

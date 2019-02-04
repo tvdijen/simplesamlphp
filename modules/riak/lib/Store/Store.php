@@ -26,10 +26,14 @@ namespace SimpleSAML\Module\riak\Store;
 
 class Store extends \SimpleSAML\Store
 {
+    /** @var \RiakClient */
     public $client;
+
+    /** @var \RiakBucket */
     public $bucket;
 
-    protected function __construct()
+
+    public function __construct()
     {
         $config = \SimpleSAML\Configuration::getConfig('module_riak.php');
 
@@ -43,12 +47,13 @@ class Store extends \SimpleSAML\Store
         $this->bucket = $this->client->bucket($bucket);
     }
 
+
     /**
      * Retrieve a value from the datastore.
      *
      * @param string $type  The datatype.
      * @param string $key  The key.
-     * @return mixed|NULL  The value.
+     * @return mixed|null  The value.
      */
     public function get($type, $key)
     {
@@ -69,13 +74,15 @@ class Store extends \SimpleSAML\Store
         return (unserialize($v->getData()));
     }
 
+
     /**
      * Save a value to the datastore.
      *
      * @param string $type  The datatype.
      * @param string $key  The key.
      * @param mixed $value  The value.
-     * @param int|NULL $expire  The expiration time (unix timestamp), or NULL if it never expires.
+     * @param int|null $expire  The expiration time (unix timestamp), or NULL if it never expires.
+     * @return void
      */
     public function set($type, $key, $value, $expire = null)
     {
@@ -91,11 +98,13 @@ class Store extends \SimpleSAML\Store
         $v->store();
     }
 
+
     /**
      * Delete a value from the datastore.
      *
      * @param string $type  The datatype.
      * @param string $key  The key.
+     * @return void
      */
     public function delete($type, $key)
     {
