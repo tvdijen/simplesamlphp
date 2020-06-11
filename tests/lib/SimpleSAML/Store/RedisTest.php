@@ -119,10 +119,13 @@ class RedisTest extends TestCase
             'store.redis.mastergroup' => 'phpunit_mastergroup',
             'store.redis.sentinels' => array('tcp://sentinel1', 'tcp://sentinel2', 'tcp://sentinel3'),
         ), '[ARRAY]', 'simplesaml');
+
+        /** @var \SimpleSAML\Store\Redis $store */
         $store = Store::getInstance();
-        $this->assertInstanceOf('\SimpleSAML\Store\Redis', $store);
-        $this->clearInstance($config, '\SimpleSAML\Configuration');
-        $this->clearInstance($store, '\SimpleSAML\Store');
+
+        $this->assertInstanceOf(Store\Redis::class, $store);
+        $this->clearInstance($config, Configuration::class);
+        $this->clearInstance($store, Store::class);
     }
 
     /**
