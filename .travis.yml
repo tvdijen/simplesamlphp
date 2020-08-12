@@ -19,9 +19,6 @@ php:
   - 7.3
   - 7.4
 
-node_js:
-  - 11
-
 env:
   - COMMAND="composer install"
   - COMMAND="composer update"
@@ -136,6 +133,8 @@ jobs:
 
     - stage: build
       env: NPM build
+      language: node_js
+      node_js: 10
       before_script:
         - npm install
         - npm audit fix
